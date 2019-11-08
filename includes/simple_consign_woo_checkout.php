@@ -104,4 +104,7 @@ function simpleconsign_aftercheckout( $order_id ) {
         $order->save();
     }
     */
+
+}
+}
 ?>

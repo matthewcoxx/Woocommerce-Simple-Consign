@@ -71,8 +71,13 @@ if ( ! class_exists( 'Simple_Consign_Class' ) ) {
 
 				$deserializer = new Simple_Consign_Class_Deserializer();
 
+				include_once 'includes/simple_consign_woo_checkout.php';
+				include_once 'includes/simple_consign_cronjob.php';
+				
 				$admin = new Simple_Consign_Class_Submenu( new Simple_Consign_Class_Submenu_Page( $deserializer ) );
 				$admin->init();
+
+
 			}
 		}
 
@@ -87,8 +92,6 @@ if ( ! class_exists( 'Simple_Consign_Class' ) ) {
 			foreach ( glob( plugin_dir_path( __FILE__ ) . 'admin/*.php' ) as $file ) {
 				include_once $file;
 			}
-			include_once 'includes/simple_consign_woo_checkout.php';
-			include_once 'includes/simple_consign_cronjob.php';
 		}
 
 		/**
