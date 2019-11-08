@@ -39,7 +39,7 @@ class Simple_Cosign_Class_Submenu {
 	 */
 	public function add_options_page() {
 
-		add_options_page(
+		add_menu_page(
 			'SimpleCosign Settings Page',
 			'SimpleCosign Settings',
 			'manage_options',
