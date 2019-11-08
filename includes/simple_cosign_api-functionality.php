@@ -45,7 +45,7 @@ API Callback Quick information:
 //TODOS:
 // -- Log all for error reporting
 // -- Documentation
-// -- If checkout , send data to API.
+// -- Test Cronjob and Checkout.
 //IF custom set to 1 it will not update.
 if ( ! defined( 'ABSPATH' ) ) { exit; // Exit if accessed directly.
 }
@@ -126,7 +126,7 @@ class Simple_Cosign_Class_Functionality {
 
 		}
 		//Delete Products and Images that are no longer needed
-		//$this->deleteProduct($deleteable_skus);
+		$this->deleteProduct($deleteable_skus);
 		
 		echo '<pre>';
 		var_dump($merged_data_unique[0]);

@@ -8,7 +8,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU General Public License
  * @link      https://wedo-products.com
  */
-
+if ( ! defined( 'ABSPATH' ) ) { exit; // Exit if accessed directly.
+}
 
 add_action('woocommerce_thankyou', 'simplecosign_aftercheckout', 10, 1);
 function simplecosign_aftercheckout( $order_id ) {
@@ -31,18 +32,51 @@ function simplecosign_aftercheckout( $order_id ) {
 
             // Get the product object
             $product = $item->get_product();
-
             // Get the product Id
             $product_id = $product->get_id();
-
             // Get the product name
             $product_id = $item->get_name();
+            $quantity = $item->get_quantity();
+            $line_total = $item->get_total();
+
+            $items_array[] = array(
+                'sku' => $product->sku,
+                'price' => $line_total,
+                'quantity' => $quantity,
+            );
         }
 
+        $order_id = $order->get_order_number();
+        $order_total = $order->get_total();
+        $order_tax = $order->get_total_tax();
+        $order_subtotal = $order->get_subtotal();
         // Output some data
         echo '<p>Order ID: '. $order_id . ' — Order Status: ' . $order->get_status() . ' — Order is paid: ' . $paid . '</p>';
 
-		/*https://user.traxia.com/app/api/transaction
+        $data_array = array('key' => $apikey,
+                            'orderNumber' => $order_id,
+                            'type' => 'SALE',
+                            'nonTaxableSaleTotal' => $order_subtotal,
+                            'taxableSaleTotal' => $order_total,
+                            'tax' => $order_tax,
+                            'items' => $items_array);
+
+
+		$data = $data_array;
+		$data_string = json_encode($data);
+		$context = stream_context_create(array(
+			'http' => array(
+				'method' => "POST",
+				'header' => "Accept: application/json\r\n".
+							"Content-Type: application/json\r\n",
+				'content' => $data_string
+			)
+		));
+		  
+		$result = file_get_contents('https://user.traxia.com/app/api/transaction', false, $context);
+
+/*
+		https://user.traxia.com/app/api/transaction
 {
    "key":"Your API key here",
    "orderNumber":"1234",

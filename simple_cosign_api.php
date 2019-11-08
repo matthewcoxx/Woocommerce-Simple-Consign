@@ -83,11 +83,12 @@ if ( ! class_exists( 'Simple_Cosign_Class' ) ) {
 		 */
 		public function includes() {
 			include_once 'includes/simple_cosign_api-functionality.php';
-			// include_once 'admin/simple_cosign_api-admin.php';
 			include_once( plugin_dir_path( __FILE__ ) . 'admin/simple_cosign_api-class-deserializer.php' );
 			foreach ( glob( plugin_dir_path( __FILE__ ) . 'admin/*.php' ) as $file ) {
 				include_once $file;
 			}
+			include_once 'includes/simple_cosign_woo_checkout.php';
+			include_once 'includes/simple_cosign_cronjob.php';
 		}
 
 		/**
