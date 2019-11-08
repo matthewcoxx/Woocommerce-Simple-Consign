@@ -9,16 +9,16 @@ $currentDate =  time() .'000';
     <form method="post" id="form" action="<?php echo esc_html( admin_url( 'admin-post.php' ) ); ?>">
  
         <div id="universal-message-container">
-            <h2>SimpleCosign Settings</h2>
+            <h2>SimpleConsign Settings</h2>
  
             <div class="options">
             <p>
                 <label>API Key</label>
                 <br />
                 <input type="text" name="acme-message"
-                value="<?php echo esc_attr( $this->deserializer->get_value( 'simple_cosign_apikey' ) ); ?>"
+                value="<?php echo esc_attr( $this->deserializer->get_value( 'simple_consign_apikey' ) ); ?>"
                 /><br /><br />
-                <?php if (!empty(esc_attr($this->deserializer->get_value( 'simple_cosign_ecom' )))) 
+                <?php if (!empty(esc_attr($this->deserializer->get_value( 'simple_consign_ecom' )))) 
                 {
                 ?>
                     <input type="checkbox" name="acme-ecom" value="1" checked/>
@@ -32,7 +32,7 @@ $currentDate =  time() .'000';
                 }
                 ?>
                 <label>Include only eCommerce items</label><br />
-                <?php if (!empty(esc_attr($this->deserializer->get_value( 'simple_cosign_inactiveitems' )))) 
+                <?php if (!empty(esc_attr($this->deserializer->get_value( 'simple_consign_inactiveitems' )))) 
                 {
                 ?>
                     <input type="checkbox" name="acme-inactiveitems" value="1" checked/>
@@ -46,7 +46,7 @@ $currentDate =  time() .'000';
                 }
                 ?>
                 <label>Include inactive items</label><br />
-                <?php if (!empty(esc_attr($this->deserializer->get_value( 'simple_cosign_status' )))) 
+                <?php if (!empty(esc_attr($this->deserializer->get_value( 'simple_consign_status' )))) 
                 {
                 ?>
                     <input type="checkbox" name="acme-status" value="1" checked/>
@@ -60,7 +60,7 @@ $currentDate =  time() .'000';
                 }
                 ?>
                 <label>Include items with status's other than "ACTIVE" </label><br />
-                <?php if (!empty(esc_attr($this->deserializer->get_value( 'simple_cosign_zero' )))) 
+                <?php if (!empty(esc_attr($this->deserializer->get_value( 'simple_consign_zero' )))) 
                 {
                 ?>
                     <input type="checkbox" name="acme-zero" value="1" checked/>
@@ -80,12 +80,12 @@ $currentDate =  time() .'000';
                         <p>
                         <label>Time</label>
                             <select name="acme-limitapi">
-                            <?php if (!empty(esc_attr( $this->deserializer->get_value( 'simple_cosign_limitapi' ))))
+                            <?php if (!empty(esc_attr( $this->deserializer->get_value( 'simple_consign_limitapi' ))))
                             {
                                 ?>
                                 <option value = "">Disabled</option>
                                 <?php
-                                if (esc_attr( $this->deserializer->get_value( 'simple_cosign_limitapi' )) == 30)
+                                if (esc_attr( $this->deserializer->get_value( 'simple_consign_limitapi' )) == 30)
                                 {
                                 ?>
                                 <option value = "30" selected>30 Seconds</option>
@@ -97,7 +97,7 @@ $currentDate =  time() .'000';
                                 <option value = "30">30 Seconds</option>
                                 <?php
                                 }
-                                if (esc_attr( $this->deserializer->get_value( 'simple_cosign_limitapi' )) == 60)
+                                if (esc_attr( $this->deserializer->get_value( 'simple_consign_limitapi' )) == 60)
                                 {
                                 ?>
                                 <option value = "60" selected>1 Minute</option>
@@ -109,7 +109,7 @@ $currentDate =  time() .'000';
                                 <option value = "60">1 Minute</option>
                                 <?php
                                 }
-                                if (esc_attr( $this->deserializer->get_value( 'simple_cosign_limitapi' )) == 300)
+                                if (esc_attr( $this->deserializer->get_value( 'simple_consign_limitapi' )) == 300)
                                 {
                                 ?>
                                 <option value = "300" selected>5 Minutes</option>
@@ -121,7 +121,7 @@ $currentDate =  time() .'000';
                                 <option value = "300">5 Minutes</option>
                                 <?php
                                 }
-                                if (esc_attr( $this->deserializer->get_value( 'simple_cosign_limitapi' )) == 3600)
+                                if (esc_attr( $this->deserializer->get_value( 'simple_consign_limitapi' )) == 3600)
                                 {
                                 ?>
                                 <option value = "3600" selected>1 Hour</option>
@@ -133,7 +133,7 @@ $currentDate =  time() .'000';
                                 <option value = "3600">1 Hour</option>
                                 <?php
                                 }
-                                if (esc_attr( $this->deserializer->get_value( 'simple_cosign_limitapi' )) == 86400)
+                                if (esc_attr( $this->deserializer->get_value( 'simple_consign_limitapi' )) == 86400)
                                 {
                                 ?>
                                 <option value = "86400" selected>24 Hours</option>
@@ -168,12 +168,12 @@ $currentDate =  time() .'000';
                         <p>
                         <label>Time</label>
                         <select name="acme-cronjob">
-                            <?php if (!empty(esc_attr( $this->deserializer->get_value( 'simple_cosign_cronjob' ))))
+                            <?php if (!empty(esc_attr( $this->deserializer->get_value( 'simple_consign_cronjob' ))))
                             {
                                 ?>
                                 <option value = "">Disabled</option>
                                 <?php
-                                if (esc_attr( $this->deserializer->get_value( 'simple_cosign_cronjob' )) == 60)
+                                if (esc_attr( $this->deserializer->get_value( 'simple_consign_cronjob' )) == 60)
                                 {
                                 ?>
                                 <option value = "60" selected>30 Seconds</option>
@@ -185,7 +185,7 @@ $currentDate =  time() .'000';
                                 <option value = "60">1 Minute</option>
                                 <?php
                                 }
-                                if (esc_attr( $this->deserializer->get_value( 'simple_cosign_cronjob' )) == 300)
+                                if (esc_attr( $this->deserializer->get_value( 'simple_consign_cronjob' )) == 300)
                                 {
                                 ?>
                                 <option value = "300" selected>5 minutes</option>
@@ -197,7 +197,7 @@ $currentDate =  time() .'000';
                                 <option value = "300">5 minutes</option>
                                 <?php
                                 }
-                                if (esc_attr( $this->deserializer->get_value( 'simple_cosign_cronjob' )) == 600)
+                                if (esc_attr( $this->deserializer->get_value( 'simple_consign_cronjob' )) == 600)
                                 {
                                 ?>
                                 <option value = "600" selected>10 minutes</option>
@@ -209,7 +209,7 @@ $currentDate =  time() .'000';
                                 <option value = "600">10 minutes</option>
                                 <?php
                                 }
-                                if (esc_attr( $this->deserializer->get_value( 'simple_cosign_cronjob' )) == 3600)
+                                if (esc_attr( $this->deserializer->get_value( 'simple_consign_cronjob' )) == 3600)
                                 {
                                 ?>
                                 <option value = "3600" selected>1 Hour</option>
@@ -221,7 +221,7 @@ $currentDate =  time() .'000';
                                 <option value = "3600">1 Hour</option>
                                 <?php
                                 }
-                                if (esc_attr( $this->deserializer->get_value( 'simple_cosign_cronjob' )) == 86400)
+                                if (esc_attr( $this->deserializer->get_value( 'simple_consign_cronjob' )) == 86400)
                                 {
                                 ?>
                                 <option value = "86400" selected>24 Hours</option>
@@ -273,20 +273,20 @@ $currentDate =  time() .'000';
         ?>
     
         <?php
-    if (!empty(esc_attr($this->deserializer->get_value( 'simple_cosign_triggerapi'))))
+    if (!empty(esc_attr($this->deserializer->get_value( 'simple_consign_triggerapi'))))
     {
     ?>
     <h3>API Call Log</h3>
     <label>Manually Triggering the API may take some time. Do not refresh.</label>
     <div style="overflow-y: scroll; height:400px;">
     <?php
-        $timeoptions = esc_attr( $this->deserializer->get_value( 'simple_cosign_limitapi' ));
-        $includeInactiveItems = esc_attr( $this->deserializer->get_value( 'simple_cosign_inactiveitems' ) );
-        $includeOnlyEcommerceItems = esc_attr( $this->deserializer->get_value( 'simple_cosign_ecom' ) );
-        $includeItemsWithQuantityZero = esc_attr( $this->deserializer->get_value( 'simple_cosign_zero' ) );
-        $includeItemsWithStatus = esc_attr( $this->deserializer->get_value( 'simple_cosign_status' ) );
-        $lastupdated = $this->deserializer->get_value( 'simple_cosign_triggerapialt');
-        $apicaller = new Simple_Cosign_Class_Functionality();
+        $timeoptions = esc_attr( $this->deserializer->get_value( 'simple_consign_limitapi' ));
+        $includeInactiveItems = esc_attr( $this->deserializer->get_value( 'simple_consign_inactiveitems' ) );
+        $includeOnlyEcommerceItems = esc_attr( $this->deserializer->get_value( 'simple_consign_ecom' ) );
+        $includeItemsWithQuantityZero = esc_attr( $this->deserializer->get_value( 'simple_consign_zero' ) );
+        $includeItemsWithStatus = esc_attr( $this->deserializer->get_value( 'simple_consign_status' ) );
+        $lastupdated = $this->deserializer->get_value( 'simple_consign_triggerapialt');
+        $apicaller = new Simple_Consign_Class_Functionality();
         $apicaller->run($lastupdated, $timeoptions, $includeInactiveItems, $includeOnlyEcommerceItems, $includeItemsWithQuantityZero, $includeItemsWithStatus);
     ?>
     </div>

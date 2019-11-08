@@ -2,14 +2,14 @@
 /**
  * Creates the submenu
  *
- * @package SimpleCosign
+ * @package SimpleConsign
  */
 
 /**
  * Creates the submenu
- * @package SimpleCosign
+ * @package SimpleConsign
  */
-class Simple_Cosign_Class_Submenu_Page {
+class Simple_Consign_Class_Submenu_Page {
 
 	private $deserializer;
 
@@ -21,7 +21,7 @@ class Simple_Cosign_Class_Submenu_Page {
 	 * Renders the contents
 	 */
 	public function render() {
-		include_once( 'views/simple_cosign_api_admin.php' );
-		//include_once( 'views/manual_trigger_simple_cosign_api_admin.php' );
+		include_once( 'views/simple_consign_api_admin.php' );
+		//include_once( 'views/manual_trigger_simple_consign_api_admin.php' );
 	}
 }

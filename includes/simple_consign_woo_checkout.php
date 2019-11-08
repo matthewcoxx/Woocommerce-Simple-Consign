@@ -1,6 +1,6 @@
 <?php
 /**
- * SimpleCosign WooCheckout Functionality
+ * SimpleConsign WooCheckout Functionality
  *
  * @category  Class
  * @package   WordPress
@@ -11,8 +11,8 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; // Exit if accessed directly.
 }
 
-add_action('woocommerce_thankyou', 'simplecosign_aftercheckout', 10, 1);
-function simplecosign_aftercheckout( $order_id ) {
+add_action('woocommerce_thankyou', 'simpleconsign_aftercheckout', 10, 1);
+function simpleconsign_aftercheckout( $order_id ) {
     if ( ! $order_id )
         return;
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * SimpleCosign Functionality
+ * SimpleConsign Functionality
  *
  * @category  Class
  * @package   WordPress
@@ -52,7 +52,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; // Exit if accessed directly.
 /**
  * Class to manage breadcrumbs and vendor's custom fields.
  */
-class Simple_Cosign_Class_Functionality {
+class Simple_Consign_Class_Functionality {
 
 	/**
 	 * Constructor
@@ -67,7 +67,7 @@ class Simple_Cosign_Class_Functionality {
 
 		global $wpdb;
 		$this->wpdb = $wpdb;
-		$this->apikey = get_option('simple_cosign_apikey');
+		$this->apikey = get_option('simple_consign_apikey');
 
 	}
 	/**
@@ -77,7 +77,7 @@ class Simple_Cosign_Class_Functionality {
 	*/
 	public function run($lastupdated, $timeoptions, $includeInactiveItems, $includeOnlyEcommerceItems, $includeItemsWithQuantityZero, $includeItemsWithStatus) {
 		//Update database once triggered.
-		update_option( 'simple_cosign_triggerapi', '' );
+		update_option( 'simple_consign_triggerapi', '' );
 		$this->timeoption = $timeoptions;
 		$this->lastupdated = $lastupdated;
 		$this->includeInactiveItems = $includeInactiveItems;
@@ -717,4 +717,4 @@ class Simple_Cosign_Class_Functionality {
 		}
 }
 
-return new Simple_Cosign_Class_Functionality();
+return new Simple_Consign_Class_Functionality();

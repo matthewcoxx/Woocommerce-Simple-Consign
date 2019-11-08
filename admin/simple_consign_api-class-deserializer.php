@@ -2,13 +2,13 @@
 /**
  * Retrieves from the database.
  *
- * @package Simple_Cosign_Class
+ * @package Simple_Consign_Class
  */
 
 /**
- * @package Simple_Cosign_Class
+ * @package Simple_Consign_Class
  */
-class Simple_Cosign_Class_Deserializer {
+class Simple_Consign_Class_Deserializer {
 
 	/**
 	 * Retrieves the value for specified key or empty string.

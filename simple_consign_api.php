@@ -1,15 +1,15 @@
 <?php
 /**
- * Plugin Name: SimpleCosign
+ * Plugin Name: SimpleConsign
  * Version: 1.0.0
  * Plugin URI: https://wedo-products.com
- * Description: SimpleCosign
+ * Description: SimpleConsign
  * Author: Matthew Cox
  * Author URI: https://wedo-products.com
  * Requires at least: 4.4.0
  * Tested up to: 5.2.0
  *
- * Text Domain: simple_cosign_api
+ * Text Domain: simple_consign_api
  * Domain Path: /languages
  *
  * @package WordPress
@@ -21,12 +21,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 
-if ( ! class_exists( 'Simple_Cosign_Class' ) ) {
+if ( ! class_exists( 'Simple_Consign_Class' ) ) {
 
 	/**
 	 * Main Class.
 	 */
-	class Simple_Cosign_Class {
+	class Simple_Consign_Class {
 
 
 		/**
@@ -66,12 +66,12 @@ if ( ! class_exists( 'Simple_Cosign_Class' ) ) {
 				$this->load_plugin_textdomain();
 				$this->includes();
 				
-				$serializer = new Simple_Cosign_Class_Serializer();
+				$serializer = new Simple_Consign_Class_Serializer();
 				$serializer->init();
 
-				$deserializer = new Simple_Cosign_Class_Deserializer();
+				$deserializer = new Simple_Consign_Class_Deserializer();
 
-				$admin = new Simple_Cosign_Class_Submenu( new Simple_Cosign_Class_Submenu_Page( $deserializer ) );
+				$admin = new Simple_Consign_Class_Submenu( new Simple_Consign_Class_Submenu_Page( $deserializer ) );
 				$admin->init();
 			}
 		}
@@ -82,13 +82,13 @@ if ( ! class_exists( 'Simple_Cosign_Class' ) ) {
 		 * @var string
 		 */
 		public function includes() {
-			include_once 'includes/simple_cosign_api-functionality.php';
-			include_once( plugin_dir_path( __FILE__ ) . 'admin/simple_cosign_api-class-deserializer.php' );
+			include_once 'includes/simple_consign_api-functionality.php';
+			include_once( plugin_dir_path( __FILE__ ) . 'admin/simple_consign_api-class-deserializer.php' );
 			foreach ( glob( plugin_dir_path( __FILE__ ) . 'admin/*.php' ) as $file ) {
 				include_once $file;
 			}
-			include_once 'includes/simple_cosign_woo_checkout.php';
-			include_once 'includes/simple_cosign_cronjob.php';
+			include_once 'includes/simple_consign_woo_checkout.php';
+			include_once 'includes/simple_consign_cronjob.php';
 		}
 
 		/**
@@ -98,11 +98,11 @@ if ( ! class_exists( 'Simple_Cosign_Class' ) ) {
 		 * @return bool
 		 */
 		public function load_plugin_textdomain() {
-			$locale = apply_filters( 'wepb_plugin_locale', get_locale(), 'simple_cosign_api' );
+			$locale = apply_filters( 'wepb_plugin_locale', get_locale(), 'simple_consign_api' );
 
-			//load_textdomain( 'simple_cosign_api', trailingslashit( WP_LANG_DIR ) . 'simple_cosign_api/simple_cosign_api' . '-' . $locale . '.mo' );
+			//load_textdomain( 'simple_consign_api', trailingslashit( WP_LANG_DIR ) . 'simple_consign_api/simple_consign_api' . '-' . $locale . '.mo' );
 
-			//load_plugin_textdomain( 'simple_cosign_api', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+			//load_plugin_textdomain( 'simple_consign_api', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
 			return true;
 		}
@@ -114,7 +114,7 @@ if ( ! class_exists( 'Simple_Cosign_Class' ) ) {
 		 */
 		public function fallback_notice() {
 			echo '<div class="error">';
-			echo '<p>' . __( 'SimpleCosign: Needs the WooCommerce Plugin activated.', 'simple_cosign_api' ) . '</p>';
+			echo '<p>' . __( 'SimpleConsign: Needs the WooCommerce Plugin activated.', 'simple_consign_api' ) . '</p>';
 			echo '</div>';
 		}
 	}
@@ -123,4 +123,4 @@ if ( ! class_exists( 'Simple_Cosign_Class' ) ) {
 /**
 * Initialize the plugin.
 */
-add_action( 'plugins_loaded', array( 'Simple_Cosign_Class', 'get_instance' ) );
+add_action( 'plugins_loaded', array( 'Simple_Consign_Class', 'get_instance' ) );

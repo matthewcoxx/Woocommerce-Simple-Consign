@@ -1,9 +1,9 @@
 <?php
 /**
- * @package SimpleCosign
+ * @package SimpleConsign
  */
  
-class Simple_Cosign_Class_Serializer {
+class Simple_Consign_Class_Serializer {
  
     /**
     * Initializes at admin_post hook
@@ -24,49 +24,49 @@ class Simple_Cosign_Class_Serializer {
         if ( null !== wp_unslash( $_POST['acme-message'] ) ) {
             $value = sanitize_text_field( $_POST['acme-message'] );
 
-            update_option( 'simple_cosign_apikey', $value );
+            update_option( 'simple_consign_apikey', $value );
         }
         if ( null !== wp_unslash( $_POST['acme-ecom'] ) ) {
             $value = sanitize_text_field( $_POST['acme-ecom'] );
             if (!empty(esc_attr($_POST['acme-ecom']))) 
             {
-                update_option( 'simple_cosign_ecom', 1 );
+                update_option( 'simple_consign_ecom', 1 );
             }
             else
             {
-                update_option( 'simple_cosign_ecom', '' );
+                update_option( 'simple_consign_ecom', '' );
             }
         }
         if ( null !== wp_unslash( $_POST['acme-inactiveitems'] ) ) {
             $value = sanitize_text_field( $_POST['acme-inactiveitems'] );
 
-            update_option( 'simple_cosign_inactiveitems', $value );
+            update_option( 'simple_consign_inactiveitems', $value );
         }
         if ( null !== wp_unslash( $_POST['acme-status'] ) ) {
             $value = sanitize_text_field( $_POST['acme-status'] );
 
-            update_option( 'simple_cosign_status', $value );
+            update_option( 'simple_consign_status', $value );
         }
         if ( null !== wp_unslash( $_POST['acme-zero'] ) ) {
             $value = sanitize_text_field( $_POST['acme-zero'] );
 
-            update_option( 'simple_cosign_zero', $value );
+            update_option( 'simple_consign_zero', $value );
         }
         if ( null !== wp_unslash( $_POST['acme-limitapi'] ) ) {
             $value = sanitize_text_field( $_POST['acme-limitapi'] );
 
-            update_option( 'simple_cosign_limitapi', $value );
+            update_option( 'simple_consign_limitapi', $value );
         }
         if ( null !== wp_unslash( $_POST['acme-cronjob'] ) ) {
             $value = sanitize_text_field( $_POST['acme-cronjob'] );
 
-            update_option( 'simple_cosign_cronjob', $value );
+            update_option( 'simple_consign_cronjob', $value );
         }
         if ( null !== wp_unslash( $_POST['acme-triggerapi'] ) ) {
             $value2 = sanitize_text_field( $_POST['acme-triggerapi'] );
 
-            update_option( 'simple_cosign_triggerapi', $value2 );
-            update_option( 'simple_cosign_triggerapialt', $value2 );
+            update_option( 'simple_consign_triggerapi', $value2 );
+            update_option( 'simple_consign_triggerapialt', $value2 );
         }
 
         $this->redirect();
