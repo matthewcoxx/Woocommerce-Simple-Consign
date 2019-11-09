@@ -85,7 +85,7 @@ class Simple_Consign_Class_Functionality {
 		$this->includeItemsWithQuantityZero = $includeItemsWithQuantityZero;
 		$this->includeItemsWithStatus = $includeItemsWithStatus;
 		$apikey = $this->apikey;
-		$api_data_decoded = json_decode($this->apipull($apikey));
+		$api_data_decoded = json_decode($this->apiPull($apikey));
 		$api_data = $api_data_decoded->results;
 		$outof_total = count($api_data);
 		$outof = 1;
@@ -129,7 +129,7 @@ class Simple_Consign_Class_Functionality {
 		$this->deleteProduct($deleteable_skus);
 		
 		echo '<pre>';
-		var_dump($merged_data_unique[0]);
+		//var_dump($merged_data_unique[0]);
 		echo '</pre>';
 	}
 
@@ -256,17 +256,21 @@ class Simple_Consign_Class_Functionality {
 	 */
 	public function addAttributes($post_id)
 	{
-		$term_taxonomy_ids = wp_set_object_terms( $post_id, '0', 'custom', true );
-		$thedata = Array(
-     		'custom'=>Array( 
-           	'name'=>'custom', 
-           	'value'=>'0',
-           	'is_visible' => '1',
-           	'is_variation' => '1',
-           	'is_taxonomy' => '1'
-     		)
-		);
-		update_post_meta( $post_id,'_product_attributes',$thedata);
+		$attr = 'custom';
+		
+		wp_set_object_terms($post_id, '0', $attr);
+
+        $thedata[sanitize_title($attr)] = array(
+            	'name' => wc_clean($attr),
+                'value' => '0',
+                'postion' => '0',
+                'is_visible' => '0',
+                'is_variation' => '1',
+                'is_taxonomy' => '1'
+        );
+                            
+		update_post_meta($post_id, '_product_attributes', $thedata);
+						
 	}
 	/**
 	* Create New Woo Product
@@ -447,6 +451,12 @@ class Simple_Consign_Class_Functionality {
 		}
 		else
 		{
+			$attach_id_array = get_post_meta($post_id,'_product_image_gallery', true);
+			$temp_array = explode(",", $attach_id_array);
+			$removed_array = array_search($attachment_id, $temp_array);
+			unset($temp_array[$removed_array]);
+			$attach_id_array_new = implode(",", $temp_array);
+			update_post_meta($post_id,'_product_image_gallery',$attach_id_array_new);
 			wp_delete_attachment( $attachment_id , true);
 		}
 
@@ -461,24 +471,15 @@ class Simple_Consign_Class_Functionality {
     public function attachProductImages($post_id, $SCitem){
    
 
-		if (!has_post_thumbnail( $post_id ) && !empty($SCitem->images))
+		if (!empty($SCitem->images))
 		{
-
+			$attach_id_array = array();
 			$SCimages = $SCitem->images;
 			$imagecount = 0;
 
 			foreach ($SCimages as $SCimage)
 			{
-				if ($imagecount == 0)
-				{
-					$flags = 0;
-				}
-				else
-				{
-					$flags = 1;
-				}
 			
-		
 	   			/*
 				* If allow_url_fopen is enable in php.ini then use this
 				*/
@@ -550,16 +551,16 @@ class Simple_Consign_Class_Functionality {
 	   			wp_update_attachment_metadata( $attach_id, $attach_data );
    
 	   			// asign to feature image
-				if( $flag == 0)
+				if( $imagecount === 0)
 				{
 		   			// And finally assign featured image to post
 		   			set_post_thumbnail( $post_id, $attach_id );
 	   			}
    
 	   			// assign to the product gallery
-			   if( $flag == 1 )
+			   if( $imagecount > 0 )
 			   {
-					   // Add gallery image to product
+					// Add gallery image to product
 					$attach_id_array = get_post_meta($post_id,'_product_image_gallery', true);
 		   			$attach_id_array .= ','.$attach_id;
 		   			update_post_meta($post_id,'_product_image_gallery',$attach_id_array);
@@ -594,22 +595,42 @@ class Simple_Consign_Class_Functionality {
 		if (!empty($SCitem->images))
 		{
 
+			//$attach_id_array = array();
 			$SCimages = $SCitem->images;
 			$imagecount = 0;
 			//First let's hash every image for this product and put it in an array. If there is any mismatch we will just delete all of them and start anew.
-			$hashed_images_array = get_post_meta($post_id,'_product_image_gallery_hashes', true);
+			$hashed_images_array = json_decode(get_post_meta($post_id,'_product_image_gallery_hashes', true));
+			$WOOimages = get_post_meta($post_id,'_product_image_gallery', true);
+			$WOOimages_1 = explode(",", $WOOimages);
+			$WOOimages_alt = count($WOOimages_1);
+			$SCimages_alt = count($SCimages);
+
+			//Delete images that are singles and update the image hashes. This way we only replace the single updated image.
+			//TO DO
+		/*	if ($WOOimages_alt > $SCimages_alt)
+			{
+				$delete_ids = array_diff($WOOimages_1, $SCimages);
+
+				foreach ($hashed_images_array as $hashed_image)
+				{
+					if ($hashed_image->url != $image_url || $hashed_image->hash != $image_hashed)
+					{
+						if (in_array())
+						{
+							unset($hashed_images_array[id]);
+						}
+
+						$hashed_match_id = $hashed_image->id;
+						$this->deleteImage($post_id, $hashed_match_id);
+
+						break;
+					}
+				}
+			}*/
+
 
 			foreach ($SCimages as $SCimage)
 			{
-				if ($imagecount == 0)
-				{
-					$flags = 0;
-				}
-				else
-				{
-					$flags = 1;
-				}
-			
 		
 	   			/*
 				* If allow_url_fopen is enable in php.ini then use this
@@ -636,7 +657,7 @@ class Simple_Consign_Class_Functionality {
 
 				foreach ($hashed_images_array as $hashed_image)
 				{
-					if ($hashed_image->url == $image_url || $hashed_image->hash == $image_hashed)
+					if ($hashed_image->url != $image_url || $hashed_image->hash != $image_hashed)
 					{
 
 						$hashed_match_id = $hashed_image->id;
@@ -696,22 +717,29 @@ class Simple_Consign_Class_Functionality {
 	   			wp_update_attachment_metadata( $attach_id, $attach_data );
    
 	   			// asign to feature image
-				if( $flag == 0)
+				if( $imagecount === 0)
 				{
 		   			// And finally assign featured image to post
 		   			set_post_thumbnail( $post_id, $attach_id );
 	   			}
    
 	   			// assign to the product gallery
-			   if( $flag == 1 )
+			   if( $imagecount > 0 )
 			   {
 		   			// Add gallery image to product
-		   			$attach_id_array = get_post_meta($post_id,'_product_image_gallery', true);
+					$attach_id_array = get_post_meta($post_id,'_product_image_gallery', true);
+					var_dump($attach_id_array);
 		   			$attach_id_array .= ','.$attach_id;
 		   			update_post_meta($post_id,'_product_image_gallery',$attach_id_array);
 				}
+				echo '<pre>';
+				var_dump($SCitem->sku);
+				var_dump($SCitem->images);
+				//var_dump($attach_id_array);
+				var_dump($imagecount);
+				echo '</pre>';
+				$imagecount++;
 			} 
-			   $imagecount++;
 			 
 			}
 		}
