@@ -607,27 +607,27 @@ class Simple_Consign_Class_Functionality {
 
 			//Delete images that are singles and update the image hashes. This way we only replace the single updated image.
 			//TO DO
-		/*	if ($WOOimages_alt > $SCimages_alt)
+			if ($WOOimages_alt > $SCimages_alt)
 			{
 				$delete_ids = array_diff($WOOimages_1, $SCimages);
 
-				foreach ($hashed_images_array as $hashed_image)
+				foreach ($delete_ids as $delete_ids_single)
 				{
-					if ($hashed_image->url != $image_url || $hashed_image->hash != $image_hashed)
+					foreach ($hashed_images_array as $hashed_image)
 					{
-						if (in_array())
+						if ($delete_ids_single == $hashed_image->id)
 						{
-							unset($hashed_images_array[id]);
+							unset($hashed_images_array[$delete_ids_single]);
+							$hashed_images_array_fixed = implode(",", $hashed_images_array);
+							$hashed_images_final = json_encode($hashed_images_array_fixed);
+							update_post_meta($post_id,'_product_image_gallery_hashes', $hashed_images_final);
+
+							$hashed_match_id = $hashed_image->id;
+							$this->deleteImage($post_id, $hashed_match_id);
 						}
-
-						$hashed_match_id = $hashed_image->id;
-						$this->deleteImage($post_id, $hashed_match_id);
-
-						break;
 					}
 				}
-			}*/
-
+			}
 
 			foreach ($SCimages as $SCimage)
 			{

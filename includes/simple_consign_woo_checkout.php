@@ -50,20 +50,29 @@ function simpleconsign_aftercheckout( $order_id ) {
         $order_total = $order->get_total();
         $order_tax = $order->get_total_tax();
         $order_subtotal = $order->get_subtotal();
-        // Output some data
-        echo '<p>Order ID: '. $order_id . ' — Order Status: ' . $order->get_status() . ' — Order is paid: ' . $paid . '</p>';
+        $apikey = get_option('simple_consign_apikey', '');
+        $checkout_sync_enabled = get_option('simple_consign_checkout', '');
+        $after_total = ($order_total * 100);
 
+        if (!empty($checkout_sync_enabled))
+        {
+        // Output some data
+        //echo '<p>Order ID: '. $order_id . ' — Order Status: ' . $order->get_status() . ' — Order is paid: ' . $paid . '</p>';
+        //TODO -- Figure out taxes ??
         $data_array = array('key' => $apikey,
                             'orderNumber' => $order_id,
                             'type' => 'SALE',
-                            'nonTaxableSaleTotal' => $order_subtotal,
-                            'taxableSaleTotal' => $order_total,
-                            'tax' => $order_tax,
+                            'nonTaxableSaleTotal' => $after_total,
+                            'taxableSaleTotal' => '0',
+                            'tax' => '0',
                             'items' => $items_array);
 
 
 		$data = $data_array;
-		$data_string = json_encode($data);
+        $data_string = json_encode($data);
+        $data_string_mail = json_decode($data);
+        $admin_email = get_option('admin_email');
+       // echo $data_string;
 		$context = stream_context_create(array(
 			'http' => array(
 				'method' => "POST",
@@ -73,38 +82,24 @@ function simpleconsign_aftercheckout( $order_id ) {
 			)
 		));
 		  
-		$result = file_get_contents('https://user.traxia.com/app/api/transaction', false, $context);
+        $result = file_get_contents('https://user.traxia.com/app/api/transaction', false, $context);
+        
+        if ($result == 'true')
+        {
+            // Do nothing
+        }
+        else
+        {
+            $headers = array('Content-Type: text/html; charset=UTF-8');
+            wp_mail($admin_email, 'SimpleCosign product quanity not updated.', $data_string_mail, $headers);
+        }
+    }
 
-/*
-		https://user.traxia.com/app/api/transaction
-{
-   "key":"Your API key here",
-   "orderNumber":"1234",
-   "type":"SALE",
-   "nonTaxableSaleTotal": 7998,
-   "taxableSaleTotal": 0,
-   "tax": 0,
-   "items": [
-      {
-         "sku": "GFFY72",
-         "price": 5400,
-         "quantity": 1
-      },
-      {
-         "sku": "AD4J56",
-         "price": 1299,
-         "quantity": 2
-      }
-   ]
-}
-*/
 		// Flag the action as done (to avoid repetitions on reload for example)
-		/*
+		
         $order->update_meta_data( '_thankyou_action_done', true );
         $order->save();
     }
-    */
-
-}
+    
 }
 ?>

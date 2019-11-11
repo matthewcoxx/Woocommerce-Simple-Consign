@@ -52,6 +52,11 @@ class Simple_Consign_Class_Serializer {
 
             update_option( 'simple_consign_zero', $value );
         }
+        if ( null !== wp_unslash( $_POST['acme-checkout'] ) ) {
+            $value = sanitize_text_field( $_POST['acme-checkout'] );
+
+            update_option( 'simple_consign_checkout', $value );
+        }
         if ( null !== wp_unslash( $_POST['acme-limitapi'] ) ) {
             $value = sanitize_text_field( $_POST['acme-limitapi'] );
 

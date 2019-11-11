@@ -74,6 +74,21 @@ $currentDate =  time() .'000';
                 }
                 ?>
                 <label>Include items with quantity of zero</label><br />
+                <?php if (!empty(esc_attr($this->deserializer->get_value( 'simple_consign_checkout' )))) 
+                {
+                ?>
+                    <input type="checkbox" name="acme-checkout" value="1" checked/>
+                <?php
+                }
+                else
+                {
+                ?>
+                    <input type="checkbox" name="acme-checkout" value="1"/>
+                <?php
+                }
+                ?>
+                <label>Enable checkout syncronization</label><br />
+                <sub>Sync purchases in Woocommerce with SimpleConsign. More information <a href="https://wiki.traxia.com/display/guide/Submit+Online+Transactions+and+Online+Returns">here</a>.</sub><br />
                 <fieldset>
                     <legend>Limit API Results to a limited time frame:</legend>
                     <sub>This helps if you have a large amount of items in your store to only load the newest items. See <a href="https://wiki.traxia.com/display/guide/List+and+Search+Inventory">here</a> for more information.
