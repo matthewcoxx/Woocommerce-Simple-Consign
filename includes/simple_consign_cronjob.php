@@ -11,7 +11,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; // Exit if accessed directly.
 }
 
-include_once(plugin_dir_path( __FILE__ ) . '/simple_consign_api.php');
+include_once(plugin_dir_path( __DIR__ ) . '/simple_consign_api.php');
 
 // SimpleConsign Cron Recurrences
 // The activation hook

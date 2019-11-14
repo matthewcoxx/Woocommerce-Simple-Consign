@@ -74,6 +74,36 @@ class Simple_Consign_Class_Serializer {
             update_option( 'simple_consign_triggerapialt', $value2 );
         }
 
+        if ( null !== wp_unslash( $_POST['triggerapi'] ) ) {
+            $value2 = sanitize_text_field( $_POST['triggerapi'] );
+        {
+            if ($_POST['triggerapi'] == 1)
+            {
+                $timeoptions = esc_attr( get_option( 'simple_consign_limitapi' ));
+                $includeInactiveItems = esc_attr( get_option( 'simple_consign_inactiveitems' ) );
+                $includeOnlyEcommerceItems = esc_attr( get_option( 'simple_consign_ecom' ) );
+                $includeItemsWithQuantityZero = esc_attr( get_option( 'simple_consign_zero' ) );
+                $includeItemsWithStatus = esc_attr( get_option( 'simple_consign_status' ) );
+                $lastupdated = get_option( 'simple_consign_triggerapialt');
+                $apicaller = new Simple_Consign_Class_Functionality();
+                $apicaller->run($lastupdated, $timeoptions, $includeInactiveItems, $includeOnlyEcommerceItems, $includeItemsWithQuantityZero, $includeItemsWithStatus);
+
+            }
+        }
+    }
+        if ( null !== wp_unslash( $_POST['cancel'] ) ) {
+            $value2 = sanitize_text_field( $_POST['cancel'] );
+        {
+
+                $lock_file = fopen(plugin_dir_path(dirname(__DIR__, 1)).'log/lock.pid', 'c');
+                $flc = file_get_contents(plugin_dir_path(dirname(__DIR__, 1)).'log/lock.pid');
+                posix_kill ( $flc , 'SIGKILL' );
+                ftruncate($lock_file, 0);
+                flock($lock_file, LOCK_UN);
+
+                
+        }
+    }
         $this->redirect();
     }
  

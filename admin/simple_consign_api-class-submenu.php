@@ -40,11 +40,12 @@ class Simple_Consign_Class_Submenu {
 	public function add_options_page() {
 
 		add_menu_page(
-			'SimpleConsign Settings Page',
-			'SimpleConsign Settings',
+			'Simple Consign Settings',
+			'Simple Consign',
 			'manage_options',
 			'simple_consign_api',
-			array( $this->submenu_page, 'render' )
+			array( $this->submenu_page, 'render' ),
+			plugins_url( 'woocommerce-simple-consign/images/cropped-traxia_favicon-192x192.png' ),
 		);
 	}
 }

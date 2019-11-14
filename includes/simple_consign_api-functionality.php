@@ -76,8 +76,29 @@ class Simple_Consign_Class_Functionality {
 	* @return void
 	*/
 	public function run($lastupdated, $timeoptions, $includeInactiveItems, $includeOnlyEcommerceItems, $includeItemsWithQuantityZero, $includeItemsWithStatus) {
+		//Lock file
+		$lock_file = fopen(plugin_dir_path( __DIR__ ).'/log/lock.pid', 'c');
+		$got_lock = flock($lock_file, LOCK_EX | LOCK_NB, $wouldblock);
+		if ($lock_file === false || (!$got_lock && !$wouldblock)) {
+    		throw new Exception(
+        		"Unexpected error opening or locking lock file. Perhaps you " .
+        		"don't  have permission to write to the lock file or its " .
+        		"containing directory?"
+    			);
+		}
+		else if (!$got_lock && $wouldblock) {
+			$this->logAction('Another instance is already running.');
+    		exit();
+		}
+
+		// Lock acquired; let's write our PID to the lock file for the convenience
+		// of humans who may wish to terminate the script.
+		ftruncate($lock_file, 0);
+		fwrite($lock_file, getmypid() . "\n");
+
 		//Update database once triggered.
 		update_option( 'simple_consign_triggerapi', '' );
+		$this->logAction('DEL');
 		$this->timeoption = $timeoptions;
 		$this->lastupdated = $lastupdated;
 		$this->includeInactiveItems = $includeInactiveItems;
@@ -85,7 +106,10 @@ class Simple_Consign_Class_Functionality {
 		$this->includeItemsWithQuantityZero = $includeItemsWithQuantityZero;
 		$this->includeItemsWithStatus = $includeItemsWithStatus;
 		$apikey = $this->apikey;
+		$this->logAction('Connecting to API.');
+		sleep(1);
 		$api_data_decoded = json_decode($this->apiPull($apikey));
+		$this->logAction('Connected.');
 		$api_data = $api_data_decoded->results;
 		$outof_total = count($api_data);
 		$outof = 1;
@@ -97,17 +121,21 @@ class Simple_Consign_Class_Functionality {
 
 		foreach ($merged_data_unique[0] as $SCitem)
 		{
+		$logOpt = '';
+		$logOpt = '('.$outof.' / '.$outof_total.') - ';
+		$this->logOpt_loopcheck = '('.$outof.' / '.$outof_total.') - ';
+
 			if ($this->includeItemsWithStatus)
 			{
 				if (!empty(wc_get_product_id_by_sku($SCitem->sku)))
 				{
 					//Update Products and Images
-					$this->updateProduct($SCitem);
+					$this->updateProduct($SCitem, $logOpt);
 				}
 				else
 				{
 					//Create Products and Images
-					$this->createNewProduct($SCitem);
+					$this->createNewProduct($SCitem, $logOpt);
 				}
 			}
 			elseif ($SCitem->status == 'ACTIVE')
@@ -115,22 +143,79 @@ class Simple_Consign_Class_Functionality {
 				if (!empty(wc_get_product_id_by_sku($SCitem->sku)))
 				{
 					//Update Products and Images					
-					$this->updateProduct($SCitem);
+					$this->updateProduct($SCitem, $logOpt);
 				}
 				else
 				{
 					//Create Products and Images
-					$this->createNewProduct($SCitem);
+					$this->createNewProduct($SCitem, $logOpt);
 				}
 			}
 
+			$outof++;
+
 		}
+
 		//Delete Products and Images that are no longer needed
 		$this->deleteProduct($deleteable_skus);
-		
-		echo '<pre>';
-		//var_dump($merged_data_unique[0]);
-		echo '</pre>';
+		$this->logAction('COMPLETE');
+
+		ftruncate($lock_file, 0);
+		flock($lock_file, LOCK_UN);
+		update_option( 'simple_consign_triggerapi_lastrun', time() );
+	}
+
+	public function logAction($action)
+	{
+		$write_path = plugin_dir_path( __DIR__ ).'/log/output.txt';
+
+		if ($action == 'COMPLETE')
+		{
+
+		}
+		else
+		{
+		//	$fp = fopen(plugin_dir_path( __FILE__ ) . '/log/output.txt', 'w');
+		//	fwrite($fp, '');
+		//	fclose($fp);	
+		}
+
+		if ($this->logOpt_loopcheck == $this->readAction())
+		{
+			$fp = fopen($write_path, 'w');
+			fwrite($fp, '');
+			fclose($fp);
+		}
+
+		if ($action == 'DEL')
+		{
+			$fp = fopen($write_path, 'w');
+			fwrite($fp, '');
+			fclose($fp);
+		}
+		elseif ($action == 'COMPLETE')
+		{
+			$fp = fopen($write_path, 'w');
+			fwrite($fp, 'COMPLETE');
+			fclose($fp);
+		}
+		else
+		{
+			$fp = fopen($write_path, 'w');
+			fwrite($fp, $action);
+			fclose($fp);
+		}
+
+	}
+
+	public function readAction()
+	{
+
+		echo file_get_contents(plugin_dir_path( __DIR__ ).'/log/output.txt');
+		//Clean
+		//$fp = fopen(plugin_dir_path( __FILE__ ) . '/log/output.txt', 'w');
+		//fwrite($fp, '');
+		//fclose($fp);
 	}
 
 	/**
@@ -244,6 +329,7 @@ class Simple_Consign_Class_Functionality {
 					'description' => '',
 					'parent' => 0,
 				) );
+			
 			}
 		return $catcheck;
 	}
@@ -279,7 +365,7 @@ class Simple_Consign_Class_Functionality {
 	*
 	* @return void
 	*/
-	public function createNewProduct($SCitem) {
+	public function createNewProduct($SCitem, $logOpt) {
 
 		//If SKU does not exist then create a new product in Woocommerce.
 
@@ -305,13 +391,19 @@ class Simple_Consign_Class_Functionality {
 			'post_excerpt' => mb_strimwidth(wp_filter_kses($SCitem->description), 0, 255, "...")
 		));
 
+		$logOpt .= wp_filter_nohtml_kses($SCitem->name).' - '.$post_id.' - ';
+
 		$this->updateProductMeta($post_id, $SCitem);
 		$this->addAttributes($post_id);
 
 		$term = get_term_by('name', $catcheck, 'product_cat');
 		wp_set_object_terms($post_id , $term->term_id, 'product_cat');
 
-		$this->attachProductImages($post_id, $SCitem);
+		$images = $this->attachProductImages($post_id, $SCitem, $logOpt);
+
+		$logOpt .= $images;
+
+		$this->logAction('[ADDED] '.$logOpt);
 
 	}
 	
@@ -324,7 +416,7 @@ class Simple_Consign_Class_Functionality {
 	* 
 	* @return void
 	*/
-	public function updateProduct($SCitem)
+	public function updateProduct($SCitem, $logOpt)
 	{
 
 		//echo 'UPDATED - '.$SCitem->sku.' - '.$catcheck.'<br>';
@@ -348,7 +440,9 @@ class Simple_Consign_Class_Functionality {
 			'post_content' => wp_filter_kses($SCitem->description),
 			'post_excerpt' => mb_strimwidth(wp_filter_kses($SCitem->description), 0, 255, "...")
 		);
-		
+
+		$logOpt .= wp_filter_nohtml_kses($SCitem->name).' - '.$post_id.' - ';
+
 		wp_update_post( $post_array );
 
 		$term = get_term_by('name', $catcheck, 'product_cat');
@@ -356,7 +450,11 @@ class Simple_Consign_Class_Functionality {
 
 		$this->updateProductMeta($post_id, $SCitem);
 
-		$this->updateProductImages($post_id, $SCitem);
+		$images = $this->updateProductImages($post_id, $SCitem, $logOpt);
+
+		$logOpt .= $images;
+
+		$this->logAction('[UPDATED] '.$logOpt);
 
 	}
 	/**
@@ -402,6 +500,7 @@ class Simple_Consign_Class_Functionality {
 
 		foreach ($deleteable_skus as $delete_sku)
 		{
+
 			if (!empty(wc_get_product_id_by_sku($delete_sku)))
 			{
 				$post_id = wc_get_product_id_by_sku($delete_sku);
@@ -410,7 +509,7 @@ class Simple_Consign_Class_Functionality {
 
 				if ($dont_delete_check == 1)
 				{
-					$output[] = '[DELETE] SKU:'.$delete_sku.' CUSTOM SET. SKIPPED.';
+					$this->logAction('[DELETED] SKU:'.$delete_sku.' CUSTOM SET. SKIPPED.');
 				}
 				else
 				{
@@ -426,13 +525,14 @@ class Simple_Consign_Class_Functionality {
 					wp_delete_attachment( $post_thumbnail_id, true );
 					wp_delete_post( $post_id, false );
 					
-					$output[] = '[DELETE] SKU:'.$delete_sku.' DELETED.';
+					$this->logAction('[DELETED] SKU:'.$delete_sku.' DELETED.');
 				}
 
 			}
+
 		}
 
-		return $output;
+		//return $output;
 	}
 	/**
 	 * Delete product images
@@ -468,7 +568,7 @@ class Simple_Consign_Class_Functionality {
 	*
 	* @param mixed $SCitem
 	*/
-    public function attachProductImages($post_id, $SCitem){
+    public function attachProductImages($post_id, $SCitem, $logOpt){
    
 
 		if (!empty($SCitem->images))
@@ -578,7 +678,7 @@ class Simple_Consign_Class_Functionality {
 
 			$hashed_images = json_encode($image_hash);
 			update_post_meta($post_id,'_product_image_gallery_hashes',$hashed_images);
-			
+			return $imagecount.' Images Added';
 		}
    }
 
@@ -589,7 +689,7 @@ class Simple_Consign_Class_Functionality {
 	*
 	* @param mixed $SCitem
 	*/
-    public function updateProductImages($post_id, $SCitem){
+    public function updateProductImages($post_id, $SCitem, $logOpt){
    
 		//Let's compare hashes of each image to make sure there was even a change. If so then we will delete the old and add the new.
 		if (!empty($SCitem->images))
@@ -607,6 +707,9 @@ class Simple_Consign_Class_Functionality {
 
 			//Delete images that are singles and update the image hashes. This way we only replace the single updated image.
 			//TO DO
+			$deleted_images_hash_count = 1;
+			$deleted_images_count = 1;
+
 			if ($WOOimages_alt > $SCimages_alt)
 			{
 				$delete_ids = array_diff($WOOimages_1, $SCimages);
@@ -624,11 +727,15 @@ class Simple_Consign_Class_Functionality {
 
 							$hashed_match_id = $hashed_image->id;
 							$this->deleteImage($post_id, $hashed_match_id);
+							$deleted_images_hash_count++;
 						}
 					}
 				}
 			}
-
+			if ($deleted_images_count > 1)
+			{
+			$logOpt_alt = $deleted_images_hash_count.' - Hash(s) Updated';
+			}
 			foreach ($SCimages as $SCimage)
 			{
 		
@@ -662,7 +769,7 @@ class Simple_Consign_Class_Functionality {
 
 						$hashed_match_id = $hashed_image->id;
 						$this->deleteImage($post_id, $hashed_match_id);
-
+						$deleted_images_count++;
 						break;
 					}
 
@@ -732,17 +839,28 @@ class Simple_Consign_Class_Functionality {
 		   			$attach_id_array .= ','.$attach_id;
 		   			update_post_meta($post_id,'_product_image_gallery',$attach_id_array);
 				}
-				echo '<pre>';
-				var_dump($SCitem->sku);
-				var_dump($SCitem->images);
+				//echo '<pre>';
+				//var_dump($SCitem->sku);
+				//var_dump($SCitem->images);
 				//var_dump($attach_id_array);
-				var_dump($imagecount);
-				echo '</pre>';
+				//var_dump($imagecount);
+				//echo '</pre>';
 				$imagecount++;
 			} 
-			 
+			if ($deleted_images_count > 0)
+			{
+				$logOpt_alt = $deleted_images_count.' - Image(s) Deleted';
 			}
+			if ($imagecount > 1)
+			{
+				$img_c = $imagecount - 1;
+				$logOpt_alt = $img_c.' - Image(s) Updated';
+			}
+
+			return $logOpt_alt;
 		}
+
+	}
 }
 
 return new Simple_Consign_Class_Functionality();

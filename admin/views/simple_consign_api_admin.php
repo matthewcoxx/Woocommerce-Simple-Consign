@@ -9,7 +9,6 @@ $currentDate =  time() .'000';
     <form method="post" id="form" action="<?php echo esc_html( admin_url( 'admin-post.php' ) ); ?>">
  
         <div id="universal-message-container">
-            <h2>SimpleConsign Settings</h2>
  
             <div class="options">
             <p>
@@ -264,6 +263,35 @@ $currentDate =  time() .'000';
                             } ?>
                             </select>
                         </p>
+                        <?php
+                        $tz = 'America/Chicago';
+                        $timestamp = get_option( 'simple_consign_triggerapi_lastrun');
+                        $dt = new DateTime("now", new DateTimeZone($tz)); //first argument "must" be a string
+                        $dt->setTimestamp($timestamp); //adjust the object to correct timestamp
+                        ?>
+                        <sub>Last Run: <?php echo $dt->format('F j, Y, g:i a'); ?></sub>
+                        <?php
+                        $lock_file = fopen(plugin_dir_path(dirname(__DIR__, 1)).'log/lock.pid', 'c');
+                        $got_lock = flock($lock_file, LOCK_EX | LOCK_NB, $wouldblock);
+                        if (!$got_lock && $wouldblock) {
+                        $locked = true;
+                        ?>
+
+                            <p id="statuson">Status: <span style="color:green;">Running</span></p>
+                            <p id="statusoff" style="display:none;">Status: <span style="color:red;">Stopped</span></p>
+
+                        <?php
+                        }
+                        else
+                        {
+                        ?>
+                            <p id="statusoff" >Status: <span style="color:red;">Stopped</span></p>
+                            <p id="statuson" style="display:none;">Status: <span style="color:green;">Running</span></p>
+
+                        <?php
+                        }
+                        ?>
+
                 </fieldset><br />
             </p>
         </div><!-- #universal-message-container -->
@@ -274,7 +302,7 @@ $currentDate =  time() .'000';
         ?>
 
     </form>
-    <form method="post" action="<?php echo esc_html( admin_url( 'admin-post.php' ) ); ?>">
+    <form method="post" id="triggerbutton" action="<?php echo esc_html( admin_url( 'admin-post.php' ) ); ?>">
     <div id="universal-message-container">
 
     <label>Trigger API Manually</label>
@@ -282,37 +310,151 @@ $currentDate =  time() .'000';
                 <input type="hidden" name="acme-triggerapi"
                 value="<?php echo $currentDate; ?>"
                 />
+                <input type="hidden" name="triggerapi" value="1" />
         <?php
             wp_nonce_field( 'acme-settings-save', 'acme-custom-message' );
             submit_button('Trigger API');
         ?>
-    
+    <!--<p class="submit" id="cancelbutton" style="display:none;"><input style="background:red; border: 1px red; color: white;" type="submit" name="cancel" id="submit" class="button button-primary" value="Stop Cronjob"></p>-->
         <?php
-    if (!empty(esc_attr($this->deserializer->get_value( 'simple_consign_triggerapi'))))
-    {
+ //   if (!empty(esc_attr($this->deserializer->get_value( 'simple_consign_triggerapi'))))
+ //   {
     ?>
-    <h3>API Call Log</h3>
+    <h3>API Call Log <img id="loadingimg" style="display:none;vertical-align:middle;width:25px;" src="<?php echo plugins_url().'/woocommerce-simple-consign/images/ajax-loader-circle.gif'; ?>"></h3>
     <label>Manually Triggering the API may take some time. Do not refresh.</label>
-    <div style="overflow-y: scroll; height:400px;">
-    <?php
-        $timeoptions = esc_attr( $this->deserializer->get_value( 'simple_consign_limitapi' ));
-        $includeInactiveItems = esc_attr( $this->deserializer->get_value( 'simple_consign_inactiveitems' ) );
-        $includeOnlyEcommerceItems = esc_attr( $this->deserializer->get_value( 'simple_consign_ecom' ) );
-        $includeItemsWithQuantityZero = esc_attr( $this->deserializer->get_value( 'simple_consign_zero' ) );
-        $includeItemsWithStatus = esc_attr( $this->deserializer->get_value( 'simple_consign_status' ) );
-        $lastupdated = $this->deserializer->get_value( 'simple_consign_triggerapialt');
-        $apicaller = new Simple_Consign_Class_Functionality();
-        $apicaller->run($lastupdated, $timeoptions, $includeInactiveItems, $includeOnlyEcommerceItems, $includeItemsWithQuantityZero, $includeItemsWithStatus);
-    ?>
+    <div class="apioutput" id="out" style="overflow-y: scroll; height:400px;overflow:auto;background:white;display:none;">
+    <div id="loader3"></div>
     </div>
+    <style>
+        .apioutput div
+        {
+            border-bottom:1px solid gray;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 5px;
+        }
+    </style>
     <?php
-    }
+//    }
         ?>
     </div><!-- #universal-message-container -->
 
 </form>
 
 </div><!-- .wrap -->
+
+<script>
+    jQuery(document).ready(function(){
+        jQuery(function(){
+<?php
+if (!$locked)
+{
+?>
+        jQuery('#triggerbutton').submit(function(e){
+                e.preventDefault();
+                var form = jQuery(this);
+                var post_url = form.attr('action');
+                var post_data = form.serialize();
+                jQuery('#statusoff').fadeOut();
+                jQuery('#triggerbutton > #universal-message-container > .submit').fadeOut();
+                //jQuery('#triggerbutton > #universal-message-container > #cancelbutton').fadeIn();
+                jQuery('#statuson').fadeIn();
+                jQuery('#out').fadeIn();
+                jQuery('#loadingimg').fadeIn();
+                //jQuery('#triggerapibutton .cancel').fadeOut();
+<?php
+}
+elseif ($locked)
+{
+?>
+                jQuery('#out').fadeIn();
+                jQuery('#loadingimg').fadeIn();
+                jQuery('#triggerbutton > #universal-message-container > .submit').fadeOut();
+                //jQuery('#triggerbutton > #universal-message-container > #cancelbutton').fadeIn();
+<?php
+}
+?>
+
+                jQuery('#loader3', form).html('Loading...');
+
+                const out = document.getElementById("out")
+                let c = 0
+                let count = 1
+var timer = setInterval(function() {
+    // allow 1px inaccuracy by adding 1
+    const isScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 1
+
+    const newElement = document.createElement("div")
+
+    jQuery.get( "<?php echo plugins_url().'/woocommerce-simple-consign/log/output.txt'; ?>", function( data ) {
+    
+
+        if (data == 'COMPLETE')
+        {
+            clearInterval(timer);
+            jQuery('#statuson').fadeOut();
+            jQuery('#statusoff').fadeIn();
+            jQuery('#loadingimg').fadeOut();
+            jQuery('#triggerapibutton > #universal-message-container > .submit').fadeIn();
+           // jQuery('#triggerapibutton > #universal-message-container > #cancelbutton').fadeOut();
+        }
+
+        var lastitemcheck = jQuery( ".apioutput div" ).last().text();
+
+        if (data == lastitemcheck)
+        {
+            //console.log('not different!');
+        }
+        else
+        {
+                //console.log('different!');
+            
+                newElement.textContent = format(data)
+
+                out.appendChild(newElement)
+
+                if (isScrolledToBottom) {
+                out.scrollTop = out.scrollHeight - out.clientHeight
+                }
+            }
+
+        if (count > 1)
+        {
+            jQuery('#loader3').fadeOut();
+        }
+        count++;
+
+    });
+
+
+}, 500)
+
+
+function format () {
+  return Array.prototype.slice.call(arguments).join(' ')
+}
+<?php
+if (!$locked)
+{
+?>
+                jQuery.ajax({
+                    type: 'POST',
+                    url: post_url, 
+                    data: post_data,
+                    success: function(msg) {
+                        //jQuery(form).fadeOut(800, function(){
+                            form.html(msg).fadeIn().delay(2000);
+
+                       // });
+                    }
+                });
+            });
+<?php
+}
+?>
+        });
+         });
+</script>
 <script type="text/javascript">
     // when page is ready
     jQuery(document).ready(function() {
